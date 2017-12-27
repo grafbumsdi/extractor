@@ -1,0 +1,4 @@
+group Internal
+
+group External
+    System.Data.SqlClient

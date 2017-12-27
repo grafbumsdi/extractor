@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extractor", "src\Extractor\Extractor.csproj", "{E5A6BE9D-34C9-476A-B00E-EFAD6AFBB519}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtractorTests", "src\ExtractorTests\ExtractorTests.csproj", "{ED9ACA1C-0EE3-46E6-ADA6-53AFC6B75B1A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E5A6BE9D-34C9-476A-B00E-EFAD6AFBB519}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5A6BE9D-34C9-476A-B00E-EFAD6AFBB519}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5A6BE9D-34C9-476A-B00E-EFAD6AFBB519}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5A6BE9D-34C9-476A-B00E-EFAD6AFBB519}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED9ACA1C-0EE3-46E6-ADA6-53AFC6B75B1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED9ACA1C-0EE3-46E6-ADA6-53AFC6B75B1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED9ACA1C-0EE3-46E6-ADA6-53AFC6B75B1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED9ACA1C-0EE3-46E6-ADA6-53AFC6B75B1A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DDFFB1A1-BE3E-47A4-8CF7-A222BE08F4A5}
+	EndGlobalSection
+EndGlobal

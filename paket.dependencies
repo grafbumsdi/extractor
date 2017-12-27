@@ -1,0 +1,8 @@
+group Internal
+    source http://192.168.11.3:8087/nuget/Libraries
+
+group External
+    source https://api.nuget.org/v3/index.json
+    nuget NLog
+    nuget NUnit
+    nuget System.Data.SqlClient
