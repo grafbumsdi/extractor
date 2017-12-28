@@ -10,6 +10,7 @@ namespace Extractor
     {
         private readonly Guid wikifolioGuid;
         private readonly Guid userGuid;
+        private readonly BasicExtractor extractor;
 
         public WikifolioExtractor(Guid wikifolioGuid)
         {
@@ -25,7 +26,7 @@ namespace Extractor
         {
             this.wikifolioGuid = wikifolioGuid;
             this.userGuid = existingUserGuid;
-            this.StatementBuilders = new List<IStatementBuilder>()
+            var statementBuilders = new List<IStatementBuilder>()
                                          {
                                              new StatementBuilder.Wikifolio(
                                                  this.wikifolioGuid,
@@ -43,37 +44,18 @@ namespace Extractor
                                          };
             if (withTicks)
             {
-                this.StatementBuilders.Add(new StatementBuilder.WikifolioTickDataAggregated(this.wikifolioGuid));
+                statementBuilders.Add(new StatementBuilder.WikifolioTickDataAggregated(this.wikifolioGuid));
             }
             if (withFees)
             {
-                this.StatementBuilders.Add(new StatementBuilder.WikifolioFee(this.wikifolioGuid));
+                statementBuilders.Add(new StatementBuilder.WikifolioFee(this.wikifolioGuid));
             }
+            this.extractor = new BasicExtractor(statementBuilders);
         }
-
-        private List<IStatementBuilder> StatementBuilders { get; set; }
 
         public void WriteInserts(TextWriter writer)
         {
-            foreach (var statementBuilder in this.StatementBuilders)
-            {
-                this.WriteInsertsWithStatementBuilder(writer, statementBuilder);
-            }
-        }
-
-        private void WriteInsertsWithStatementBuilder(TextWriter writer, IStatementBuilder statementBuilder)
-        {
-            writer.WriteLine($"-- INSERTS FOR: {statementBuilder.Identifier()}");
-            this.ReadAndReplace(writer, statementBuilder);
-            writer.WriteLine(string.Empty);
-        }
-
-        private void ReadAndReplace(TextWriter writer, IStatementBuilder statementBuilder)
-        {
-            foreach (var row in new SqlDataReader().GetRows(statementBuilder))
-            {
-                writer.WriteLine(new Replacer(row, statementBuilder.InsertStatement()).GetFinalOutput());
-            }
+            this.extractor.WriteInserts(writer);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Extractor.StatementBuilder
 {
     public abstract class DefaultStatementBuilder : IStatementBuilder
     {
-        public string InsertStatement()
+        public virtual string InsertStatement()
         {
             return this.InsertStatementColumnList()
                 + "VALUES"
