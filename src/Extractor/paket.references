@@ -1,4 +1,5 @@
 group Internal
 
 group External
+    McMaster.Extensions.CommandLineUtils
     System.Data.SqlClient

@@ -3,6 +3,7 @@ group Internal
 
 group External
     source https://api.nuget.org/v3/index.json
+    nuget McMaster.Extensions.CommandLineUtils
     nuget Microsoft.NET.Test.Sdk
     nuget NLog
     nuget NUnit
