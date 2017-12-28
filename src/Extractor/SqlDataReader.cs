@@ -31,8 +31,7 @@ namespace Extractor
                 }
                 finally
                 {
-                    // Always call Close when done reading.
-                    // reader.Close();
+                    reader.Close();
                 }
             }
         }

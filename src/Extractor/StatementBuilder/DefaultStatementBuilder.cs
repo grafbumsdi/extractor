@@ -28,8 +28,12 @@ namespace Extractor.StatementBuilder
 
         public virtual string QueryStatement()
         {
-            return "SELECT " + string.Join(",", this.Fields().Select(f => $"[{f.ValueIdentifier}]"))
-                   + $" FROM dbo.[{this.TableIdentifier()}] WHERE " + this.GetCondition();
+            return this.QueryStatement(string.Join(",", this.Fields().Select(f => $"[{f.ValueIdentifier}]")));
+        }
+
+        protected virtual string QueryStatement(string fields)
+        {
+            return $"SELECT {fields} FROM dbo.[{this.TableIdentifier()}] WHERE " + this.GetCondition();
         }
 
         public abstract Placeholder[] Fields();

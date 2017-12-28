@@ -2,9 +2,9 @@
 
 namespace Extractor
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var wikifolioGuid = new Guid("01DB9DB8-DC41-4FEF-8172-001F101573F9");
             wikifolioGuid = new Guid("FF48D396-7D1D-4E3C-A9D2-0414173BC23F");

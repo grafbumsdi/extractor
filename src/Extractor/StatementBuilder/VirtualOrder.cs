@@ -59,5 +59,7 @@ FROM
 ORDER BY MinCreationDate DESC
 ) ORDER BY [CreationDate] ASC";
         }
+
+        public string GetUnderlyings() => this.QueryStatement(fields: "DISTINCT [Underlying]");
     }
 }
