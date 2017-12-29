@@ -15,7 +15,7 @@ namespace Extractor.PlaceholderOptions
         {
             var diff = DateTime.Now.Date - time.Date;
             return
-                $"DATEADD(MILLISECOND, {time.TimeOfDay.TotalMilliseconds}, DATEADD(DAY, DATEDIFF(DAY, {diff.TotalDays}, GETDATE()), 0))";
+                $"DATEADD(MILLISECOND, {Math.Floor(time.TimeOfDay.TotalMilliseconds)}, DATEADD(DAY, DATEDIFF(DAY, {diff.TotalDays}, GETDATE()), 0))";
         }
     }
 }

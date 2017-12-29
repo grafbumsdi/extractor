@@ -20,7 +20,7 @@ namespace Extractor
             {
                 foreach (var underlyingIsin in this.ReadUnderlyings(virtualOrderStatementBuilder))
                 {
-                    statementBuilders.Add(new StatementBuilder.Underlying(underlyingIsin));
+                    statementBuilders.Insert(0, new StatementBuilder.Underlying(underlyingIsin));
                 }
             }
 
@@ -40,7 +40,7 @@ namespace Extractor
         private IEnumerable<string> ReadUnderlyings(StatementBuilder.VirtualOrder virtualOrderStatementBuilder)
         {
             var sqlReader = new SqlDataReader();
-            foreach(var row in sqlReader.GetRows(virtualOrderStatementBuilder.GetUnderlyings()))
+            foreach(var row in sqlReader.GetRows(virtualOrderStatementBuilder.GetUnderlyingsQueryStatement()).Distinct())
             {
                 yield return (string)row[row.Keys.First()];
             }

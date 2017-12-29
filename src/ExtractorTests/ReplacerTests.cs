@@ -16,7 +16,11 @@ namespace ExtractorTests
         private static readonly DateTime TestDateTime = new DateTime(2017, 11, 1, 14, 13, 02).AddMilliseconds(89);
 
         private static readonly Dictionary<string, object> DefaultDictionary =
-            new Dictionary<string, object>() { { "gaxi", null }, { "dateNull", null }, { "date", TestDateTime }, { "freeText", FreeText } };
+            new Dictionary<string, object>()
+                {
+                    { "gaxi", null }, { "dateNull", null }, { "date", TestDateTime }, { "freeText", FreeText },
+                    { "DBNull", DBNull.Value}, { "dateWithFractionalMilliseconds", TestDateTime.AddTicks(23) }
+                };
 
         private int DiffToTestTimeInDays => (int)(DateTime.Now.Date - TestDateTime.Date).TotalDays;
 
@@ -98,11 +102,38 @@ namespace ExtractorTests
         }
 
         [Test]
+        public void GetFinalOutputDateMatchesRelativeDateTimeWithFractialMilliseconds()
+        {
+            var replacer = new Replacer(DefaultDictionary, "SELECT {dateWithFractionalMilliseconds:RELATIVEDATETIME}");
+            Assert.AreEqual(
+                $"SELECT DATEADD(MILLISECOND, 51182089, DATEADD(DAY, DATEDIFF(DAY, {this.DiffToTestTimeInDays}, GETDATE()), 0))",
+                replacer.GetFinalOutput());
+        }
+
+        [Test]
         public void GetFinalOutputDateMatchesRelativeDateTimeUtc()
         {
             var replacer = new Replacer(DefaultDictionary, "SELECT {date:RELATIVEDATETIMEUTC}");
             Assert.AreEqual(
                 $"SELECT DATEADD(MILLISECOND, 51182089, DATEADD(DAY, DATEDIFF(DAY, {this.DiffToTestTimeInDays}, GETUTCDATE()), 0))",
+                replacer.GetFinalOutput());
+        }
+
+        [Test]
+        public void GetFinalOutputDateMatchesRelativeDateTimeUtcWithFractialMilliseconds()
+        {
+            var replacer = new Replacer(DefaultDictionary, "SELECT {dateWithFractionalMilliseconds:RELATIVEDATETIMEUTC}");
+            Assert.AreEqual(
+                $"SELECT DATEADD(MILLISECOND, 51182089, DATEADD(DAY, DATEDIFF(DAY, {this.DiffToTestTimeInDays}, GETUTCDATE()), 0))",
+                replacer.GetFinalOutput());
+        }
+
+        [Test]
+        public void GetFinalOutputDbNull()
+        {
+            var replacer = new Replacer(DefaultDictionary, "SELECT {DBNull}, {DBNull:DATETIME}, {DBNull:RELATIVEDATETIME}, {DBNull:RELATIVEDATETIMEUTC}");
+            Assert.AreEqual(
+                $"SELECT NULL, NULL, NULL, NULL",
                 replacer.GetFinalOutput());
         }
     }

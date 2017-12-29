@@ -47,6 +47,19 @@ wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA A61696C7-3343-4761-8EA7-1EB39A27E
         public bool WithFees { get; }
 
         [Option(
+            template: "--withItems",
+            optionType: CommandOptionType.NoValue,
+            Description = "If given, all wikifolio items (including underlyings) will also be extracted")]
+        public bool WithItems { get; }
+
+        [Option(
+            template: "--withRecentVirtualOrderGroups <MAXIMUM_LIMIT_OF_VIRTUALORDERGROUPS>",
+            optionType: CommandOptionType.SingleValue,
+            Description = "If given, most recent virtual order groups of the wikifolio will also be extracted. " +
+                          "Number of virtual order groups is limited by <MAXIMUM_LIMIT_OF_VIRTUALORDERGROUPS>")]
+        public int? WithRecentVirtualOrderGroups { get; }
+
+        [Option(
             template: "--outputfile",
             optionType: CommandOptionType.SingleValue,
             Description = "If given, the output will be written into the given file " + 
@@ -68,7 +81,8 @@ wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA A61696C7-3343-4761-8EA7-1EB39A27E
                 wikifolioGuid,
                 wikifolioOwnerGuid,
                 this.WithWikifolioTickData,
-                this.WithFees);
+                this.WithFees,
+                this.WithItems);
 
             TextWriter writer;
             if (!this.TryParseOutputFile(out writer))
@@ -76,6 +90,15 @@ wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA A61696C7-3343-4761-8EA7-1EB39A27E
                 writer = console.Out;
             }
             wikifolioExtractor.WriteInserts(writer);
+
+            if (this.WithRecentVirtualOrderGroups.HasValue)
+            {
+                var virtualOrderExtractor = new VirtualOrderExtractor(wikifolioGuid, this.WithRecentVirtualOrderGroups.Value);
+                virtualOrderExtractor.WriteInserts(writer);
+            }
+            writer.WriteLine("-- DONE");
+            writer.Close();
+            writer.Dispose();
         }
 
         private bool TryParseGuid(string rawValue, out Guid outputGuid, string argumentName)

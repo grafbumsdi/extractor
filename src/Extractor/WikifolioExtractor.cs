@@ -22,7 +22,7 @@ namespace Extractor
         /// </summary>
         /// <param name="wikifolioGuid"></param>
         /// <param name="existingUserGuid">That will be used for Insert Statements</param>
-        public WikifolioExtractor(Guid wikifolioGuid, Guid existingUserGuid, bool withTicks, bool withFees)
+        public WikifolioExtractor(Guid wikifolioGuid, Guid existingUserGuid, bool withTicks, bool withFees, bool withItems)
         {
             this.wikifolioGuid = wikifolioGuid;
             this.userGuid = existingUserGuid;
@@ -50,6 +50,12 @@ namespace Extractor
             {
                 statementBuilders.Add(new StatementBuilder.WikifolioFee(this.wikifolioGuid));
             }
+            if (withItems)
+            {
+                var wikifolioItemExtractor = new WikifolioItemExtractor(this.wikifolioGuid);
+                statementBuilders.AddRange(wikifolioItemExtractor.GetStatementBuilders());
+            }
+            // TODO: WikifolioTransaction
             this.extractor = new BasicExtractor(statementBuilders);
         }
 

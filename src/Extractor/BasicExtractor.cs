@@ -14,6 +14,8 @@ namespace Extractor
 
         private IList<IStatementBuilder> StatementBuilders { get; set; }
 
+        public IList<IStatementBuilder> GetStatementBuilders() => this.StatementBuilders;
+
         public void WriteInserts(TextWriter writer)
         {
             foreach (var statementBuilder in this.StatementBuilders)

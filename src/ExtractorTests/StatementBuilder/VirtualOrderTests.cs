@@ -24,8 +24,8 @@ namespace ExtractorTests.StatementBuilder
             var wikifolioGuid = new Guid("C03CD005-2A25-4A10-A127-903D2135DFB1");
             var virtualOrderStatementBuilder = new Extractor.StatementBuilder.VirtualOrder(wikifolioGuid, 20);
             Assert.That(
-                virtualOrderStatementBuilder.GetUnderlyings(),
-                Is.EqualTo("SELECT DISTINCT [Underlying] FROM dbo.[VirtualOrder] WHERE " + this.ExpectedCondition(20, wikifolioGuid)));
+                virtualOrderStatementBuilder.GetUnderlyingsQueryStatement(),
+                Is.EqualTo("SELECT [Underlying] FROM dbo.[VirtualOrder] WHERE " + this.ExpectedCondition(20, wikifolioGuid)));
         }
 
         private void AssertQueryStatement(
