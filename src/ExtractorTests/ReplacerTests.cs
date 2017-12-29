@@ -13,12 +13,22 @@ namespace ExtractorTests
         private const string FreeText = "free text ' :option DateTIME anything { $%&$} wer";
         private const string FreeTextPreparedForInsert = "free text '' :option DateTIME anything { $%&$} wer";
 
+        private const string FreeTextWithLineBreak = @"free text with line break
+gaxi
+
+uije";
+
+        private const string FreeTextWithLineBreakPreparedForInsert =
+            "free text with line break' + CHAR(13) + CHAR(10) + 'gaxi'"
+            + " + CHAR(13) + CHAR(10) + '' + CHAR(13) + CHAR(10) + 'uije";
+
         private static readonly DateTime TestDateTime = new DateTime(2017, 11, 1, 14, 13, 02).AddMilliseconds(89);
 
         private static readonly Dictionary<string, object> DefaultDictionary =
             new Dictionary<string, object>()
                 {
                     { "gaxi", null }, { "dateNull", null }, { "date", TestDateTime }, { "freeText", FreeText },
+                    { "freeTextWithLineBreak", FreeTextWithLineBreak},
                     { "DBNull", DBNull.Value}, { "dateWithFractionalMilliseconds", TestDateTime.AddTicks(23) }
                 };
 
@@ -134,6 +144,15 @@ namespace ExtractorTests
             var replacer = new Replacer(DefaultDictionary, "SELECT {DBNull}, {DBNull:DATETIME}, {DBNull:RELATIVEDATETIME}, {DBNull:RELATIVEDATETIMEUTC}");
             Assert.AreEqual(
                 $"SELECT NULL, NULL, NULL, NULL",
+                replacer.GetFinalOutput());
+        }
+
+        [Test]
+        public void GetFinalOutputFreeTextWithLineBreak()
+        {
+            var replacer = new Replacer(DefaultDictionary, "SELECT {freeTextWithLineBreak}");
+            Assert.AreEqual(
+                $"SELECT '{FreeTextWithLineBreakPreparedForInsert}'",
                 replacer.GetFinalOutput());
         }
     }

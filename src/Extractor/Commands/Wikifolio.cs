@@ -11,14 +11,13 @@ namespace Extractor.Commands
          Description = @"extracts a given wikifolio from production database in form of INSERT statements.",
          ExtendedHelpText = @"
 Example Usage: 
-wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA A61696C7-3343-4761-8EA7-1EB39A27E431 --withFees --withWikifolioTickData --outputfile ""gaxi.txt""
-wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA A61696C7-3343-4761-8EA7-1EB39A27E431
+wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA --fixedWikifolioEditor A61696C7-3343-4761-8EA7-1EB39A27E431 --withFees --withWikifolioTickData --outputfile ""gaxi.txt""
+wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA
 ",
          ShowInHelpText = true), HelpOption]
     public class Wikifolio
     {
         private const string WikifolioGuidArgumentIdentifier = "WikifolioGuid";
-        private const string WikifolioOwnerGuidArgumentIdentifier = "WikifolioOwnerGuid";
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "You must specify the wikifolio guid")]
         [Argument(
@@ -27,12 +26,11 @@ wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA A61696C7-3343-4761-8EA7-1EB39A27E
             description: "The guid of the wikifolio you want to extract - MUST BE SPECIFIED")]
         public string WikifolioGuidArgument { get; }
 
-        [Required(AllowEmptyStrings = false, ErrorMessage = "You must specify an existing user guid for " + WikifolioOwnerGuidArgumentIdentifier)]
-        [Argument(
-            order: 1,
-            name: WikifolioOwnerGuidArgumentIdentifier,
-            description: "The guid of the user that will be the owner of the wikifolio - MUST BE SPECIFIED")]
-        public string WikifolioOwnerGuidArgument { get; }
+        [Option(
+            template: "--fixedWikifolioEditor <USER_GUID>",
+            optionType: CommandOptionType.SingleValue,
+            description: "If given, the guid will be used as owner / editor of the wikifolio.")]
+        public string FixedWikifolioEditor { get; }
 
         [Option(
             template: "--withWikifolioTickData",
@@ -68,28 +66,47 @@ wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA A61696C7-3343-4761-8EA7-1EB39A27E
 
         private void OnExecute(CommandLineApplication app, IConsole console)
         {
-            Guid wikifolioGuid;
-            Guid wikifolioOwnerGuid;
-            if (!this.TryParseGuid(this.WikifolioGuidArgument, out wikifolioGuid, WikifolioGuidArgumentIdentifier)
-                || !this.TryParseGuid(this.WikifolioOwnerGuidArgument, out wikifolioOwnerGuid, WikifolioOwnerGuidArgumentIdentifier))
-            {
-                app.ShowHelp();
-                return;
-            }
-
-            var wikifolioExtractor = new WikifolioExtractor(
-                wikifolioGuid,
-                wikifolioOwnerGuid,
-                this.WithWikifolioTickData,
-                this.WithFees,
-                this.WithItems);
-
             TextWriter writer;
             if (!this.TryParseOutputFile(out writer))
             {
                 writer = console.Out;
             }
-            wikifolioExtractor.WriteInserts(writer);
+
+            Guid wikifolioGuid;
+            
+            if (!this.TryParseGuid(this.WikifolioGuidArgument, out wikifolioGuid, WikifolioGuidArgumentIdentifier))
+            {
+                app.ShowHelp();
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(this.FixedWikifolioEditor))
+            {
+                Guid wikifolioOwnerGuid;
+                if (!this.TryParseGuid(this.FixedWikifolioEditor, out wikifolioOwnerGuid, "--fixedWikifolioEditor"))
+                {
+                    app.ShowHelp();
+                    return;
+                }
+                var wikifolioExtractor = new WikifolioExtractor(
+                    wikifolioGuid,
+                    wikifolioOwnerGuid,
+                    this.WithWikifolioTickData,
+                    this.WithFees,
+                    this.WithItems);
+
+                wikifolioExtractor.WriteInserts(writer);
+            }
+            else
+            {
+                var wikifolioExtractor = new WikifolioWithUserExtractor(
+                    wikifolioGuid,
+                    this.WithWikifolioTickData,
+                    this.WithFees,
+                    this.WithItems);
+
+                wikifolioExtractor.WriteInserts(writer);
+            }
 
             if (this.WithRecentVirtualOrderGroups.HasValue)
             {

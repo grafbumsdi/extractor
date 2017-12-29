@@ -50,7 +50,11 @@ namespace Extractor
             }
             if (rawValue is string)
             {
-                rawValue = ((string)rawValue).Replace("'", "''");
+                rawValue = ((string)rawValue)
+                    .Replace("'", "''")
+                    .Replace("\r\n", "' + CHAR(13) + CHAR(10) + '")
+                    .Replace("\r", "' + CHAR(13) + '")
+                    .Replace("\n", "' + CHAR(13) + '");
             }
             return $"'{rawValue.ToString()}'";
         }
