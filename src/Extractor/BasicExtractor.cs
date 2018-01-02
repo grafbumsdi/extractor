@@ -1,20 +1,30 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
+using Extractor.BuildingPlans;
 using Extractor.StatementBuilder;
 
 namespace Extractor
 {
     public class BasicExtractor
     {
-        public BasicExtractor(IList<IStatementBuilder> statementBuilders)
+        public BasicExtractor()
+        : this(new List<IStatementBuilder>())
         {
-            this.StatementBuilders = statementBuilders;
         }
 
-        private IList<IStatementBuilder> StatementBuilders { get; set; }
+        public BasicExtractor(IList<IStatementBuilder> statementBuilders)
+        {
+            this.StatementBuilders = new List<IStatementBuilder>();
+            this.StatementBuilders.AddRange(statementBuilders);
+        }
 
-        public IList<IStatementBuilder> GetStatementBuilders() => this.StatementBuilders;
+        public void AddBuildingPlan(IBuildingPlan buildingPlan)
+        {
+            this.StatementBuilders.AddRange(buildingPlan.GetStatementBuilders());
+        }
+
+        private List<IStatementBuilder> StatementBuilders { get; set; }
 
         public void WriteInserts(TextWriter writer)
         {

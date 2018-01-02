@@ -2,6 +2,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 
+using Extractor.BuildingPlans;
+
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Extractor.Commands
@@ -80,6 +82,7 @@ wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA
                 return;
             }
 
+            var extractor = new BasicExtractor();
             if (!string.IsNullOrEmpty(this.FixedWikifolioEditor))
             {
                 Guid wikifolioOwnerGuid;
@@ -88,31 +91,30 @@ wikifolio 9B7F994D-3C9A-45B9-BB15-001A7EF522AA
                     app.ShowHelp();
                     return;
                 }
-                var wikifolioExtractor = new WikifolioExtractor(
-                    wikifolioGuid,
-                    wikifolioOwnerGuid,
-                    this.WithWikifolioTickData,
-                    this.WithFees,
-                    this.WithItems);
-
-                wikifolioExtractor.WriteInserts(writer);
+                extractor.AddBuildingPlan(
+                    new WikifolioBuildingPlan(
+                        wikifolioGuid,
+                        wikifolioOwnerGuid,
+                        this.WithWikifolioTickData,
+                        this.WithFees,
+                        this.WithItems));
             }
             else
             {
-                var wikifolioExtractor = new WikifolioWithUserExtractor(
-                    wikifolioGuid,
-                    this.WithWikifolioTickData,
-                    this.WithFees,
-                    this.WithItems);
-
-                wikifolioExtractor.WriteInserts(writer);
+                extractor.AddBuildingPlan(
+                    new WikifolioWithUserBuildingPlan(
+                        wikifolioGuid,
+                        this.WithWikifolioTickData,
+                        this.WithFees,
+                        this.WithItems));
             }
 
             if (this.WithRecentVirtualOrderGroups.HasValue)
             {
-                var virtualOrderExtractor = new VirtualOrderExtractor(wikifolioGuid, this.WithRecentVirtualOrderGroups.Value);
-                virtualOrderExtractor.WriteInserts(writer);
+                extractor.AddBuildingPlan(
+                    new VirtualOrderBuildingPlan(wikifolioGuid, this.WithRecentVirtualOrderGroups.Value));
             }
+            extractor.WriteInserts(writer);
             writer.WriteLine("-- DONE");
             writer.Close();
             writer.Dispose();

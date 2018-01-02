@@ -1,26 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 using Extractor.StatementBuilder;
 
-namespace Extractor
+namespace Extractor.BuildingPlans
 {
-    public class VirtualOrderExtractor
+    public class VirtualOrderBuildingPlan : IBuildingPlan
     {
-        private readonly BasicExtractor extractor;
+        private readonly IList<IStatementBuilder> statementBuilders;
 
-        public VirtualOrderExtractor(Guid wikifolioGuid, int limitOfVirtualOrderGroups = 50, bool createUnderlyings = true, bool createPhoneOrders = false)
+        public VirtualOrderBuildingPlan(Guid wikifolioGuid, int limitOfVirtualOrderGroups = 50, bool createUnderlyings = true, bool createPhoneOrders = false)
         {
             var virtualOrderStatementBuilder =
                 new StatementBuilder.VirtualOrder(wikifolioGuid, limitOfVirtualOrderGroups);
-            var statementBuilders = new List<IStatementBuilder>() { virtualOrderStatementBuilder };
+            this.statementBuilders = new List<IStatementBuilder>() { virtualOrderStatementBuilder };
             if (createUnderlyings)
             {
                 foreach (var underlyingIsin in this.ReadUnderlyings(virtualOrderStatementBuilder))
                 {
-                    statementBuilders.Insert(0, new StatementBuilder.Underlying(underlyingIsin));
+                    this.statementBuilders.Insert(0, new StatementBuilder.Underlying(underlyingIsin));
                 }
             }
 
@@ -28,22 +27,18 @@ namespace Extractor
             {
                 throw new NotImplementedException("Phone Order creation not yet implemented");
             }
-
-            this.extractor = new BasicExtractor(statementBuilders);
         }
 
-        public void WriteInserts(TextWriter writer)
-        {
-            this.extractor.WriteInserts(writer);
-        }
-
+        // TODO: avoid this readunderlyings in here. do it somewhere else
         private IEnumerable<string> ReadUnderlyings(StatementBuilder.VirtualOrder virtualOrderStatementBuilder)
         {
             var sqlReader = new SqlDataReader();
-            foreach(var row in sqlReader.GetRows(virtualOrderStatementBuilder.GetUnderlyingsQueryStatement()).Distinct())
+            foreach (var row in sqlReader.GetRows(virtualOrderStatementBuilder.GetUnderlyingsQueryStatement()).Distinct())
             {
                 yield return (string)row[row.Keys.First()];
             }
         }
+
+        public IList<IStatementBuilder> GetStatementBuilders() => this.statementBuilders;
     }
 }

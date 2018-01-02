@@ -1,31 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 using Extractor.StatementBuilder;
 
-namespace Extractor
+namespace Extractor.BuildingPlans
 {
-    public class WikifolioExtractor
+    public class WikifolioBuildingPlan : IBuildingPlan
     {
         private readonly Guid wikifolioGuid;
         private readonly Guid userGuid;
-        private readonly BasicExtractor extractor;
 
-        public WikifolioExtractor(Guid wikifolioGuid)
-        {
-            throw new NotImplementedException("wikifolio creation with user creation not implemented yet");
-        }
+        private readonly bool withTicks;
+        private readonly bool withFees;
+        private readonly bool withItems;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="wikifolioGuid"></param>
         /// <param name="existingUserGuid">That will be used for Insert Statements</param>
-        public WikifolioExtractor(Guid wikifolioGuid, Guid existingUserGuid, bool withTicks, bool withFees, bool withItems)
+        public WikifolioBuildingPlan(Guid wikifolioGuid, Guid existingUserGuid, bool withTicks, bool withFees, bool withItems)
         {
             this.wikifolioGuid = wikifolioGuid;
             this.userGuid = existingUserGuid;
+            this.withTicks = withTicks;
+            this.withFees = withFees;
+            this.withItems = withItems;
+        }
+
+        public IList<IStatementBuilder> GetStatementBuilders()
+        {
             var statementBuilders = new List<IStatementBuilder>()
                                          {
                                              new StatementBuilder.Wikifolio(
@@ -42,26 +46,21 @@ namespace Extractor
                                              new StatementBuilder.WikifolioCashAccountTransaction(this.wikifolioGuid),
                                              new StatementBuilder.WikifolioMessage(this.wikifolioGuid)
                                          };
-            if (withTicks)
+            if (this.withTicks)
             {
                 statementBuilders.Add(new StatementBuilder.WikifolioTickDataAggregated(this.wikifolioGuid));
             }
-            if (withFees)
+            if (this.withFees)
             {
                 statementBuilders.Add(new StatementBuilder.WikifolioFee(this.wikifolioGuid));
             }
-            if (withItems)
+            if (this.withItems)
             {
-                var wikifolioItemExtractor = new WikifolioItemExtractor(this.wikifolioGuid);
-                statementBuilders.AddRange(wikifolioItemExtractor.GetStatementBuilders());
+                var wikifolioItemBuildingPlan = new WikifolioItemBuildingPlan(this.wikifolioGuid);
+                statementBuilders.AddRange(wikifolioItemBuildingPlan.GetStatementBuilders());
             }
             // TODO: WikifolioTransaction
-            this.extractor = new BasicExtractor(statementBuilders);
-        }
-
-        public void WriteInserts(TextWriter writer)
-        {
-            this.extractor.WriteInserts(writer);
+            return statementBuilders;
         }
     }
 }

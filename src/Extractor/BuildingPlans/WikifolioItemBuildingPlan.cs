@@ -1,38 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 using Extractor.StatementBuilder;
 
-namespace Extractor
+namespace Extractor.BuildingPlans
 {
-    public class WikifolioItemExtractor
+    public class WikifolioItemBuildingPlan : IBuildingPlan
     {
-        private readonly BasicExtractor extractor;
+        private readonly IList<IStatementBuilder> statementBuilders;
 
-        public WikifolioItemExtractor(Guid wikifolioGuid, bool createUnderlyings = true)
+        public WikifolioItemBuildingPlan(Guid wikifolioGuid, bool createUnderlyings = true)
         {
             var wikifolioItemStatementBuilder =
                 new StatementBuilder.WikifolioItem(wikifolioGuid);
-            var statementBuilders = new List<IStatementBuilder>() { wikifolioItemStatementBuilder };
+            this.statementBuilders = new List<IStatementBuilder>() { wikifolioItemStatementBuilder };
             if (createUnderlyings)
             {
                 foreach (var underlyingIsin in this.ReadUnderlyings(wikifolioItemStatementBuilder))
                 {
-                    statementBuilders.Insert(0, new StatementBuilder.Underlying(underlyingIsin));
+                    this.statementBuilders.Insert(0, new StatementBuilder.Underlying(underlyingIsin));
                 }
             }
-            this.extractor = new BasicExtractor(statementBuilders);
         }
 
-        public IList<IStatementBuilder> GetStatementBuilders() => this.extractor.GetStatementBuilders();
-
-        public void WriteInserts(TextWriter writer)
-        {
-            this.extractor.WriteInserts(writer);
-        }
-
+        // TODO: avoid this readunderlyings in here. do it somewhere else
         private IEnumerable<string> ReadUnderlyings(StatementBuilder.WikifolioItem wikifolioItemStatementBuilder)
         {
             var sqlReader = new SqlDataReader();
@@ -41,5 +33,7 @@ namespace Extractor
                 yield return (string)row[row.Keys.First()];
             }
         }
+
+        public IList<IStatementBuilder> GetStatementBuilders() => this.statementBuilders;
     }
 }
